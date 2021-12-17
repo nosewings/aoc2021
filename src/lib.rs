@@ -57,13 +57,13 @@ macro_rules! make_test {
             use super::{$parse, $run};
             use crate::read_input;
             paste! {
-            #[test]
-            fn [<test_ $day _ $part>]() {
-                let s = read_input($day);
-                let (_, p) = $parse()(&s).expect("error while parsing input");
-                let v = $run(p);
-                assert_eq!(v, $expected);
-            }
+                #[test]
+                fn [<test_ $day _ $part>]() {
+                    let s = read_input($day);
+                    let (_, p) = $parse()(&s).expect("error while parsing input");
+                    let v = $run(p);
+                    assert_eq!(v, $expected);
+                }
             }
         }
     };
