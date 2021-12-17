@@ -1,0 +1,13 @@
+#!/bin/sh
+
+cargo fmt --check 1>/dev/null 2>/dev/null
+if [[ $? -ne 0 ]]; then
+    echo "rustfmt found problems; run cargo fmt before committing"
+    exit 1
+fi
+
+cargo clippy -- -F clippy::all 1>/dev/null 2>/dev/null
+if [[ $? -ne 0 ]]; then
+    echo "clippy found problems; resolve them before committing"
+    exit 1
+fi
