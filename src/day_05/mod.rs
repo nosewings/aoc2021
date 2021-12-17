@@ -62,7 +62,11 @@ impl Vents {
 pub fn parse_vents<'a>() -> impl FnMut(&'a str) -> IResult<&'a str, Vec<Vents>> {
     fn coordinate<'a>() -> impl FnMut(&'a str) -> IResult<&'a str, Coordinate> {
         map(
-            separated_pair(parse_u32(), char(','), parse_u32()),
+            separated_pair(
+                parse_integral_nonnegative(),
+                char(','),
+                parse_integral_nonnegative(),
+            ),
             |(x, y)| Coordinate { x, y },
         )
     }

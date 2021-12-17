@@ -30,7 +30,7 @@ pub struct Input {
 
 pub fn parse_input<'a>() -> impl FnMut(&'a str) -> IResult<&'a str, Input> {
     fn numbers<'a>() -> impl FnMut(&'a str) -> IResult<&'a str, Vec<usize>> {
-        separated_list1(char(','), parse_usize())
+        separated_list1(char(','), parse_integral_nonnegative())
     }
 
     fn layout<'a>() -> impl FnMut(&'a str) -> IResult<&'a str, Layout> {
@@ -39,7 +39,7 @@ pub fn parse_input<'a>() -> impl FnMut(&'a str) -> IResult<&'a str, Input> {
                 newline,
                 preceded(
                     many0(char(' ')),
-                    separated_list1(many1(char(' ')), parse_usize()),
+                    separated_list1(many1(char(' ')), parse_integral_nonnegative()),
                 ),
             ),
             |lines| {

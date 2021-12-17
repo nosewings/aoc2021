@@ -5,7 +5,10 @@ use nom::multi::separated_list1;
 use crate::*;
 
 pub fn parse_input<'a>() -> impl FnMut(&'a str) -> IResult<&'a str, Vec<u64>> {
-    all_consuming(newline_terminated(separated_list1(char(','), parse_u64())))
+    all_consuming(newline_terminated(separated_list1(
+        char(','),
+        parse_integral_nonnegative(),
+    )))
 }
 
 fn update_table(table: &mut Array2<Option<u64>>, total: usize, time: usize, timer: usize) -> u64 {

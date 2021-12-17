@@ -31,7 +31,7 @@ pub fn parse_command<'a>() -> impl FnMut(&'a str) -> IResult<&'a str, Vec<Comman
 
     fn command<'a>() -> impl FnMut(&'a str) -> IResult<&'a str, Command> {
         map(
-            separated_pair(direction(), char(' '), parse_i32_nn()),
+            separated_pair(direction(), char(' '), parse_integral_nonnegative()),
             |(direction, magnitude)| Command {
                 direction,
                 magnitude,

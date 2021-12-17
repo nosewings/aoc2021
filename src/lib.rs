@@ -10,6 +10,7 @@ pub mod day_06;
 use std::io::Read;
 use std::iter::Step;
 use std::ops::RangeInclusive;
+use std::str::FromStr;
 
 use frunk::monoid::Monoid;
 use nom::character::complete::{digit1, newline};
@@ -115,23 +116,10 @@ where
     }
 }
 
-/// Parser for `usize`.
-pub fn parse_usize<'a>() -> impl FnMut(&'a str) -> IResult<&'a str, usize> {
-    map_res(digit1, str::parse)
-}
-
-/// Parser for `u32`.
-pub fn parse_u32<'a>() -> impl FnMut(&'a str) -> IResult<&'a str, u32> {
-    map_res(digit1, str::parse)
-}
-
-/// Parser for `u64`.
-pub fn parse_u64<'a>() -> impl FnMut(&'a str) -> IResult<&'a str, u64> {
-    map_res(digit1, str::parse)
-}
-
-/// Parser for `i32` with no sign.
-pub fn parse_i32_nn<'a>() -> impl FnMut(&'a str) -> IResult<&'a str, i32> {
+pub fn parse_integral_nonnegative<'a, T>() -> impl FnMut(&'a str) -> IResult<&'a str, T>
+where
+    T: FromStr,
+{
     map_res(digit1, str::parse)
 }
 
