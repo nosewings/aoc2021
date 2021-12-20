@@ -8,6 +8,7 @@ pub mod day_05;
 pub mod day_06;
 pub mod day_07;
 pub mod day_08;
+pub mod day_09;
 
 use std::io::Read;
 use std::iter::Step;
@@ -15,6 +16,7 @@ use std::ops::RangeInclusive;
 use std::str::FromStr;
 
 use frunk::monoid::Monoid;
+use ndarray::Array2;
 use nom::character::complete::{digit1, newline};
 use nom::combinator::{all_consuming, map_res};
 use nom::sequence::terminated;
@@ -115,6 +117,18 @@ where
         F: FnMut(Self::Item) -> M,
     {
         self.map(f).fold(M::empty(), |x, y| x.combine(&y))
+    }
+}
+
+pub trait Shape2 {
+    fn shape2(&self) -> (usize, usize);
+}
+
+impl<T> Shape2 for Array2<T> {
+    fn shape2(&self) -> (usize, usize) {
+        type Sh = [usize; 2];
+        let [w, h] = Sh::try_from(self.shape()).unwrap();
+        (w, h)
     }
 }
 
