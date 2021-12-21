@@ -6,7 +6,7 @@ use nom::combinator::{all_consuming, map_res};
 use nom::multi::{many1, separated_list1};
 use nom::IResult;
 
-use crate::{newline_terminated, Shape2};
+use crate::{newline_terminated, Array2Ext};
 
 pub fn parse_input<'a>() -> impl FnMut(&'a str) -> IResult<&'a str, Array2<u32>> {
     fn digit<'a>() -> impl FnMut(&'a str) -> IResult<&'a str, u32> {
@@ -25,22 +25,14 @@ pub fn parse_input<'a>() -> impl FnMut(&'a str) -> IResult<&'a str, Array2<u32>>
     )))
 }
 
-pub fn adjacent_indices(
-    (w, h): (usize, usize),
-    (i, j): (usize, usize),
-) -> impl Iterator<Item = (usize, usize)> {
-    let l = i.checked_sub(1).map(|k| (k, j));
-    let r = i.checked_add(1).filter(|&k| k < w).map(|k| (k, j));
-    let u = j.checked_sub(1).map(|k| (i, k));
-    let d = j.checked_add(1).filter(|&k| k < h).map(|k| (i, k));
-    [l, r, u, d].into_iter().flatten()
-}
-
 pub fn lows(input: &Array2<u32>) -> impl Iterator<Item = (usize, usize)> + '_ {
     input
         .indexed_iter()
         .filter(|(ix, &h)| {
-            adjacent_indices(input.shape2(), *ix).all(|ix| input.get(ix).map_or(true, |&x| h < x))
+            input
+                .neighbor_indices(*ix)
+                .into_iter()
+                .all(|ix| input.get(ix).map_or(true, |&x| h < x))
         })
         .map(|p| p.0)
 }

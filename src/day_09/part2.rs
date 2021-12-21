@@ -14,7 +14,10 @@ fn explore(
         return 0;
     }
     flags[ix] = true;
-    1 + adjacent_indices(input.shape2(), ix).fold_map(|ix| explore(input, flags, ix, Some(here)))
+    1 + input
+        .cardinal_neighbor_indices(ix)
+        .into_iter()
+        .fold_map(|ix| explore(input, flags, ix, Some(here)))
 }
 
 fn run(input: Array2<u32>) -> usize {

@@ -122,15 +122,73 @@ where
     }
 }
 
-pub trait Shape2 {
+pub trait Array2Ext {
     fn shape2(&self) -> (usize, usize);
+    fn cardinal_neighbor_indices(&self, ix: (usize, usize)) -> Vec<(usize, usize)>;
+    fn neighbor_indices(&self, ix: (usize, usize)) -> Vec<(usize, usize)>;
 }
 
-impl<T> Shape2 for Array2<T> {
+impl<T> Array2Ext for Array2<T> {
     fn shape2(&self) -> (usize, usize) {
         type Sh = [usize; 2];
         let [w, h] = Sh::try_from(self.shape()).unwrap();
         (w, h)
+    }
+
+    fn cardinal_neighbor_indices(&self, (i, j): (usize, usize)) -> Vec<(usize, usize)> {
+        let (w, h) = self.shape2();
+        let l = i.checked_sub(1);
+        let r = i.checked_add(1).filter(|&k| k < w);
+        let u = j.checked_sub(1);
+        let d = j.checked_add(1).filter(|&k| k < h);
+        let mut ret = Vec::new();
+        if let Some(k) = r {
+            ret.push((k, j))
+        }
+        if let Some(k) = l {
+            ret.push((k, j))
+        }
+        if let Some(k) = u {
+            ret.push((i, k))
+        }
+        if let Some(k) = d {
+            ret.push((i, k))
+        }
+        ret
+    }
+
+    fn neighbor_indices(&self, (i, j): (usize, usize)) -> Vec<(usize, usize)> {
+        let (w, h) = self.shape2();
+        let l = i.checked_sub(1);
+        let r = i.checked_add(1).filter(|&k| k < w);
+        let u = j.checked_sub(1);
+        let d = j.checked_add(1).filter(|&k| k < h);
+        let mut ret = Vec::new();
+        if let Some(k) = r {
+            ret.push((k, j))
+        }
+        if let Some(k) = l {
+            ret.push((k, j))
+        }
+        if let Some(k) = u {
+            ret.push((i, k))
+        }
+        if let Some(k) = d {
+            ret.push((i, k))
+        }
+        if let Some(ix) = r.zip(u) {
+            ret.push(ix)
+        }
+        if let Some(ix) = r.zip(d) {
+            ret.push(ix)
+        }
+        if let Some(ix) = l.zip(u) {
+            ret.push(ix)
+        }
+        if let Some(ix) = l.zip(d) {
+            ret.push(ix)
+        }
+        ret
     }
 }
 
