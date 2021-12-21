@@ -36,8 +36,7 @@ pub fn adjacent_indices(
     [l, r, u, d].into_iter().flatten()
 }
 
-#[allow(clippy::needless_lifetimes)]
-pub fn lows<'a>(input: &'a Array2<u32>) -> impl Iterator<Item = (usize, usize)> + 'a {
+pub fn lows(input: &Array2<u32>) -> impl Iterator<Item = (usize, usize)> + '_ {
     input
         .indexed_iter()
         .filter(|(ix, &h)| {
