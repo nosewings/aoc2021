@@ -45,6 +45,7 @@ pub fn read_input(n: u32) -> String {
 macro_rules! make_main {
     ($day:literal, $parse:ident, $run:ident) => {
         fn main() {
+            use aoc2021::read_input;
             let s = read_input($day);
             let (_, v) = $parse()(&s).expect("error while parsing input");
             println!("{}", $run(v));
@@ -57,10 +58,10 @@ macro_rules! make_test {
     ($day: literal, $part:literal, $parse:ident, $run:ident, $expected:literal) => {
         #[cfg(test)]
         mod test {
+            use aoc2021::read_input;
             use paste::paste;
 
             use super::{$parse, $run};
-            use crate::read_input;
             paste! {
                 #[test]
                 fn [<test_ $day _ $part>]() {
