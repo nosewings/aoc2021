@@ -1,3 +1,4 @@
+#![feature(hash_drain_filter)]
 #![feature(step_trait)]
 
 pub mod day_01;
@@ -12,6 +13,7 @@ pub mod day_09;
 pub mod day_10;
 pub mod day_11;
 pub mod day_12;
+pub mod day_13;
 
 use std::io::Read;
 use std::iter::Step;
