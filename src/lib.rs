@@ -60,7 +60,7 @@ macro_rules! make_main {
 
 #[macro_export]
 macro_rules! make_test {
-    ($day: literal, $part:literal, $parse:ident, $run:ident, $expected:expr) => {
+    ($day: literal, $part:literal, $parse:ident, $run:ident, $expected:literal) => {
         #[cfg(test)]
         mod test {
             use aoc2021::read_input;
@@ -74,34 +74,6 @@ macro_rules! make_test {
                     let (_, p) = $parse()(&s).expect("error while parsing input");
                     let v = $run(p);
                     assert_eq!(v, $expected);
-                }
-            }
-        }
-    };
-}
-
-#[macro_export]
-macro_rules! make_test_against_output {
-    ($day: literal, $part:literal, $parse:ident, $run:ident) => {
-        #[cfg(test)]
-        mod test {
-            use std::fs::File;
-            use std::io::Read;
-
-            use aoc2021::read_input;
-            use paste::paste;
-
-            use super::{$parse, $run};
-            paste! {
-                #[test]
-                fn [<test_ $day _ $part>]() {
-                    let s = read_input($day);
-                    let (_, p) = $parse()(&s).expect("error while parsing input");
-                    let v = $run(p);
-                    let mut contents = String::new();
-                    let mut file = File::open(format!("outputs/{}_{}.txt", $day, $part)).unwrap();
-                    file.read_to_string(&mut contents).unwrap();
-                    assert_eq!(v, contents);
                 }
             }
         }

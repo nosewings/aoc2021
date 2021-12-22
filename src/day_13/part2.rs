@@ -17,10 +17,10 @@ fn run(mut input: Input) -> String {
                 '.'
             });
         }
-        buf.push('\n');
+        buf.push('\n')
     }
     buf.into_iter().collect::<String>()
 }
 
 make_main! {13, parse_input, run}
-make_test_against_output! {13, 2, parse_input, run}
+// The output string should say "PCPHARKL".
