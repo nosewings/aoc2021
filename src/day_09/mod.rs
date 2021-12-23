@@ -1,4 +1,3 @@
-use itertools::Itertools;
 use ndarray::Array2;
 use nom::character::complete::{newline, satisfy};
 use nom::character::is_digit;
@@ -17,11 +16,7 @@ pub fn parse_input<'a>() -> impl FnMut(&'a str) -> IResult<&'a str, Array2<u32>>
 
     all_consuming(newline_terminated(map_res(
         separated_list1(newline, many1(digit())),
-        |lines| {
-            let shape = (lines.len(), lines[0].len());
-            let lines = lines.into_iter().flatten().collect_vec();
-            Array2::from_shape_vec(shape, lines)
-        },
+        Array2::from_rows,
     )))
 }
 

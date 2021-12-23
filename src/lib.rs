@@ -22,7 +22,8 @@ use std::ops::RangeInclusive;
 use std::str::FromStr;
 
 use frunk::monoid::Monoid;
-use ndarray::Array2;
+use itertools::Itertools;
+use ndarray::{Array2, ShapeError};
 use nom::character::complete::{digit1, newline};
 use nom::combinator::{all_consuming, map_res};
 use nom::sequence::terminated;
@@ -128,12 +129,26 @@ where
 }
 
 pub trait Array2Ext {
+    type Item;
+    fn from_rows(rows: Vec<Vec<Self::Item>>) -> Result<Self, ShapeError>
+    where
+        Self: Sized;
     fn shape2(&self) -> (usize, usize);
     fn cardinal_neighbor_indices(&self, ix: (usize, usize)) -> Vec<(usize, usize)>;
     fn neighbor_indices(&self, ix: (usize, usize)) -> Vec<(usize, usize)>;
 }
 
 impl<T> Array2Ext for Array2<T> {
+    type Item = T;
+    fn from_rows(rows: Vec<Vec<T>>) -> Result<Self, ShapeError>
+    where
+        Self: Sized,
+    {
+        let shape = (rows.len(), rows[0].len());
+        let rows = rows.into_iter().flatten().collect_vec();
+        Array2::from_shape_vec(shape, rows)
+    }
+
     fn shape2(&self) -> (usize, usize) {
         type Sh = [usize; 2];
         let [w, h] = Sh::try_from(self.shape()).unwrap();
