@@ -133,9 +133,38 @@ pub trait Array2Ext {
     fn from_rows(rows: Vec<Vec<Self::Item>>) -> Result<Self, ShapeError>
     where
         Self: Sized;
+
     fn shape2(&self) -> (usize, usize);
+
+    fn uix(&self, ix: (usize, usize)) -> Option<(usize, usize)>;
+    fn dix(&self, ix: (usize, usize)) -> Option<(usize, usize)>;
+    fn lix(&self, ix: (usize, usize)) -> Option<(usize, usize)>;
+    fn rix(&self, ix: (usize, usize)) -> Option<(usize, usize)>;
+    fn ulix(&self, ix: (usize, usize)) -> Option<(usize, usize)>;
+    fn urix(&self, ix: (usize, usize)) -> Option<(usize, usize)>;
+    fn dlix(&self, ix: (usize, usize)) -> Option<(usize, usize)>;
+    fn drix(&self, ix: (usize, usize)) -> Option<(usize, usize)>;
+
     fn cardinal_neighbor_indices(&self, ix: (usize, usize)) -> Vec<(usize, usize)>;
     fn neighbor_indices(&self, ix: (usize, usize)) -> Vec<(usize, usize)>;
+}
+
+fn u<T>(_: &Array2<T>, i: usize) -> Option<usize> {
+    i.checked_sub(1)
+}
+
+fn d<T>(a: &Array2<T>, i: usize) -> Option<usize> {
+    let (h, _) = a.shape2();
+    i.checked_add(1).filter(|&k| k < h)
+}
+
+fn l<T>(_: &Array2<T>, j: usize) -> Option<usize> {
+    j.checked_sub(1)
+}
+
+fn r<T>(a: &Array2<T>, j: usize) -> Option<usize> {
+    let (_, w) = a.shape2();
+    j.checked_add(1).filter(|&k| k < w)
 }
 
 impl<T> Array2Ext for Array2<T> {
@@ -151,64 +180,63 @@ impl<T> Array2Ext for Array2<T> {
 
     fn shape2(&self) -> (usize, usize) {
         type Sh = [usize; 2];
-        let [w, h] = Sh::try_from(self.shape()).unwrap();
-        (w, h)
+        let [h, w] = Sh::try_from(self.shape()).unwrap();
+        (h, w)
     }
 
-    fn cardinal_neighbor_indices(&self, (i, j): (usize, usize)) -> Vec<(usize, usize)> {
-        let (w, h) = self.shape2();
-        let l = i.checked_sub(1);
-        let r = i.checked_add(1).filter(|&k| k < w);
-        let u = j.checked_sub(1);
-        let d = j.checked_add(1).filter(|&k| k < h);
-        let mut ret = Vec::new();
-        if let Some(k) = r {
-            ret.push((k, j))
-        }
-        if let Some(k) = l {
-            ret.push((k, j))
-        }
-        if let Some(k) = u {
-            ret.push((i, k))
-        }
-        if let Some(k) = d {
-            ret.push((i, k))
-        }
-        ret
+    fn uix(&self, (i, j): (usize, usize)) -> Option<(usize, usize)> {
+        u(self, i).map(|i| (i, j))
     }
 
-    fn neighbor_indices(&self, (i, j): (usize, usize)) -> Vec<(usize, usize)> {
-        let (w, h) = self.shape2();
-        let l = i.checked_sub(1);
-        let r = i.checked_add(1).filter(|&k| k < w);
-        let u = j.checked_sub(1);
-        let d = j.checked_add(1).filter(|&k| k < h);
-        let mut ret = Vec::new();
-        if let Some(k) = r {
-            ret.push((k, j))
-        }
-        if let Some(k) = l {
-            ret.push((k, j))
-        }
-        if let Some(k) = u {
-            ret.push((i, k))
-        }
-        if let Some(k) = d {
-            ret.push((i, k))
-        }
-        if let Some(ix) = r.zip(u) {
-            ret.push(ix)
-        }
-        if let Some(ix) = r.zip(d) {
-            ret.push(ix)
-        }
-        if let Some(ix) = l.zip(u) {
-            ret.push(ix)
-        }
-        if let Some(ix) = l.zip(d) {
-            ret.push(ix)
-        }
-        ret
+    fn dix(&self, (i, j): (usize, usize)) -> Option<(usize, usize)> {
+        d(self, i).map(|i| (i, j))
+    }
+
+    fn lix(&self, (i, j): (usize, usize)) -> Option<(usize, usize)> {
+        l(self, j).map(|j| (i, j))
+    }
+
+    fn rix(&self, (i, j): (usize, usize)) -> Option<(usize, usize)> {
+        r(self, j).map(|j| (i, j))
+    }
+
+    fn ulix(&self, (i, j): (usize, usize)) -> Option<(usize, usize)> {
+        u(self, i).zip(l(self, j))
+    }
+
+    fn urix(&self, (i, j): (usize, usize)) -> Option<(usize, usize)> {
+        u(self, i).zip(r(self, j))
+    }
+
+    fn dlix(&self, (i, j): (usize, usize)) -> Option<(usize, usize)> {
+        d(self, i).zip(l(self, j))
+    }
+
+    fn drix(&self, (i, j): (usize, usize)) -> Option<(usize, usize)> {
+        d(self, i).zip(r(self, j))
+    }
+
+    fn cardinal_neighbor_indices(&self, ix: (usize, usize)) -> Vec<(usize, usize)> {
+        vec![self.uix(ix), self.dix(ix), self.lix(ix), self.rix(ix)]
+            .into_iter()
+            .flatten()
+            .collect_vec()
+    }
+
+    fn neighbor_indices(&self, ix: (usize, usize)) -> Vec<(usize, usize)> {
+        vec![
+            self.uix(ix),
+            self.dix(ix),
+            self.lix(ix),
+            self.rix(ix),
+            self.ulix(ix),
+            self.urix(ix),
+            self.dlix(ix),
+            self.drix(ix),
+        ]
+        .into_iter()
+        .flatten()
+        .collect_vec()
     }
 }
 
