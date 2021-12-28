@@ -16,6 +16,7 @@ pub mod day_12;
 pub mod day_13;
 pub mod day_14;
 pub mod day_15;
+pub mod day_16;
 
 use std::io::Read;
 use std::iter::Step;
@@ -23,6 +24,7 @@ use std::ops::RangeInclusive;
 use std::str::FromStr;
 
 use frunk::monoid::Monoid;
+use frunk::Semigroup;
 use itertools::Itertools;
 use ndarray::{Array2, ShapeError};
 use nom::character::complete::{digit1, newline};
@@ -98,6 +100,35 @@ where
         Box::new((end..=start).rev())
     };
     ret
+}
+
+/// A trait for monkey-patching Haskell's `foldMap` onto Rust's
+/// iterators.
+pub trait FoldMapOption {
+    /// The item type for this type.
+    type Item;
+
+    /// Map the items to a `Monoid`, and them combine the results
+    /// monoidally.
+    fn fold_map_option<S, F>(self, f: F) -> Option<S>
+    where
+        S: Semigroup,
+        F: FnMut(Self::Item) -> S;
+}
+
+impl<I> FoldMapOption for I
+where
+    I: Iterator,
+{
+    type Item = <Self as Iterator>::Item;
+
+    fn fold_map_option<S, F>(self, f: F) -> Option<S>
+    where
+        S: Semigroup,
+        F: FnMut(Self::Item) -> S,
+    {
+        self.map(f).reduce(|x, y| x.combine(&y))
+    }
 }
 
 /// A trait for monkey-patching Haskell's `foldMap` onto Rust's

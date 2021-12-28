@@ -4,6 +4,7 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+combine = "4.6.2"
 counter = "0.5.2"
 enumset = "1.0.8"
 frunk = "0.4.0"
@@ -137,3 +138,11 @@ path = "src/day_15/part1.rs"
 [[bin]]
 name = "15_2"
 path = "src/day_15/part2.rs"
+
+[[bin]]
+name = "16_1"
+path = "src/day_16/part1.rs"
+
+[[bin]]
+name = "16_2"
+path = "src/day_16/part2.rs"
