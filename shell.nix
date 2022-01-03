@@ -1,4 +1,4 @@
 { pkgs ? import <nixpkgs> {} }:
 pkgs.mkShell {
-    nativeBuildInputs = with pkgs; [ clang ];
+  nativeBuildInputs = with pkgs; [ clang ];
 }
