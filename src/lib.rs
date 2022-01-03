@@ -1,3 +1,5 @@
+#![feature(box_patterns)]
+#![feature(box_syntax)]
 #![feature(hash_drain_filter)]
 #![feature(step_trait)]
 
@@ -17,12 +19,14 @@ pub mod day_13;
 pub mod day_14;
 pub mod day_15;
 pub mod day_16;
+pub mod day_18;
 
 use std::io::Read;
 use std::iter::Step;
 use std::ops::RangeInclusive;
 use std::str::FromStr;
 
+use combine::Parser;
 use frunk::monoid::Monoid;
 use frunk::Semigroup;
 use itertools::Itertools;
@@ -284,4 +288,47 @@ where
     F: FnMut(&'a str) -> IResult<&'a str, A>,
 {
     terminated(f, newline)
+}
+
+pub fn combine_parse_integral_nonnegative<'a, T>() -> impl Parser<&'a str, Output = T>
+where
+    T: Clone + FromStr,
+{
+    combine::many1(combine::parser::char::digit()).then(|s: String| {
+        str::parse(&s)
+            .map(|n: T| combine::value(n).left())
+            .unwrap_or_else(|_| combine::unexpected_any("non-digit").right())
+    })
+}
+
+/// Ripped off from the take_mut crate.  See `take_return` for an
+/// important variation.
+pub fn take<T, F>(mut_ref: &mut T, closure: F)
+where
+    F: FnOnce(T) -> T,
+{
+    use std::ptr;
+    unsafe {
+        let old_t = std::ptr::read(mut_ref);
+        let new_t = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| closure(old_t)))
+            .unwrap_or_else(|_| std::process::abort());
+        ptr::write(mut_ref, new_t);
+    }
+}
+
+/// A variant of `take` that allows returning a value from the
+/// closure.
+///
+/// Sort of like a linear state monad.
+pub fn take_return<T, R, F>(mut_ref: &mut T, closure: F) -> R
+where
+    F: FnOnce(T) -> (R, T),
+{
+    unsafe {
+        let old_t = std::ptr::read(mut_ref);
+        let (r, new_t) = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| closure(old_t)))
+            .unwrap_or_else(|_| std::process::abort());
+        std::ptr::write(mut_ref, new_t);
+        r
+    }
 }
