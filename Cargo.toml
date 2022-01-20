@@ -9,8 +9,13 @@ counter = "0.5.2"
 enumset = "1.0.8"
 frunk = "0.4.0"
 itertools = "0.9.0"
+lazy_static = "1.4.0"
+nalgebra = "0.30.1"
 ndarray = "0.15.4"
 nom = "7.1.0"
+num-traits = "0.2.14"
+petgraph = "0.6.0"
+rayon = "1.5.1"
 
 [dev-dependencies]
 paste = "1.0.6"
@@ -154,3 +159,11 @@ path = "src/day_18/part1.rs"
 [[bin]]
 name = "18_2"
 path = "src/day_18/part2.rs"
+
+[[bin]]
+name = "19_1"
+path = "src/day_19/part1.rs"
+
+[[bin]]
+name = "19_2"
+path = "src/day_19/part2.rs"

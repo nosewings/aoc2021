@@ -1,7 +1,11 @@
 #![feature(box_patterns)]
 #![feature(box_syntax)]
 #![feature(hash_drain_filter)]
+#![feature(once_cell)]
 #![feature(step_trait)]
+
+#[macro_use]
+extern crate itertools;
 
 pub mod day_01;
 pub mod day_02;
@@ -20,12 +24,15 @@ pub mod day_14;
 pub mod day_15;
 pub mod day_16;
 pub mod day_18;
+pub mod day_19;
 
+use std::fmt::Display;
 use std::io::Read;
 use std::iter::Step;
 use std::ops::RangeInclusive;
 use std::str::FromStr;
 
+use combine::parser::char::char;
 use combine::Parser;
 use frunk::monoid::Monoid;
 use frunk::Semigroup;
@@ -35,6 +42,7 @@ use nom::character::complete::{digit1, newline};
 use nom::combinator::{all_consuming, map_res};
 use nom::sequence::terminated;
 use nom::IResult;
+use num_traits::Signed;
 
 pub fn read_input(n: u32) -> String {
     let args = std::env::args().collect::<Vec<_>>();
@@ -68,6 +76,20 @@ macro_rules! make_main {
 }
 
 #[macro_export]
+macro_rules! make_main_combine {
+    ($day:literal, $parse:expr, $run:ident) => {
+        fn main() {
+            use ::aoc2021::read_input;
+            use ::combine::Parser;
+
+            let s = read_input($day);
+            let (v, _) = $parse().parse(&s).expect("error while parsing input");
+            println!("{}", $run(v));
+        }
+    };
+}
+
+#[macro_export]
 macro_rules! make_test {
     ($day: literal, $part:literal, $parse:ident, $run:ident, $expected:literal) => {
         #[cfg(test)]
@@ -81,6 +103,30 @@ macro_rules! make_test {
                 fn [<test_ $day _ $part>]() {
                     let s = read_input($day);
                     let (_, p) = $parse()(&s).expect("error while parsing input");
+                    let v = $run(p);
+                    assert_eq!(v, $expected);
+                }
+            }
+        }
+    };
+}
+
+#[macro_export]
+macro_rules! make_test_combine {
+    ($day:literal, $part:literal, $parse:expr, $run:expr, $expected:expr) => {
+        #[cfg(test)]
+        mod test {
+            use ::aoc2021::read_input;
+            use ::combine::Parser;
+            use ::paste::paste;
+
+            use super::*;
+
+            paste! {
+                #[test]
+                fn [<test_ $day _ $part>]() {
+                    let s = read_input($day);
+                    let (p, _) = $parse().parse(&s).expect("error while parsing input");
                     let v = $run(p);
                     assert_eq!(v, $expected);
                 }
@@ -292,13 +338,25 @@ where
 
 pub fn combine_parse_integral_nonnegative<'a, T>() -> impl Parser<&'a str, Output = T>
 where
-    T: Clone + FromStr,
+    T: FromStr,
+    T::Err: Display,
 {
-    combine::many1(combine::parser::char::digit()).then(|s: String| {
-        str::parse(&s)
-            .map(|n: T| combine::value(n).left())
-            .unwrap_or_else(|_| combine::unexpected_any("non-digit").right())
-    })
+    use combine::parser::char::*;
+    use combine::*;
+    from_str(many1::<String, _, _>(digit()))
+}
+
+pub fn combine_parse_integral<'a, T>() -> impl Parser<&'a str, Output = T>
+where
+    T: FromStr + Signed,
+    T::Err: Display,
+{
+    use combine::*;
+    optional(char('-')).and(combine_parse_integral_nonnegative()).map(|(sgn, n)|
+                                                                      match sgn {
+                                                                          None => T::one(),
+                                                                          _ => T::one().neg()
+                                                                      } * n)
 }
 
 /// Ripped off from the take_mut crate.  See `take_return` for an
