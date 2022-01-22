@@ -6,19 +6,6 @@ if [[ $? -ne 0 ]]; then
     exit 1
 fi
 
-export RUSTFLAGS="-D warnings"
-cargo build 1>/dev/null 2>/dev/null
-if [[ $? -ne 0 ]]; then
-    echo "cargo lint check failed; resolve before committing"
-    exit 1
-fi
-
-cargo test 1>/dev/null 2>/dev/null
-if [[ $? -ne 0 ]]; then
-    echo "cargo test found problems; resolve them before committing"
-    exit 1
-fi
-
 cargo fmt --check 1>/dev/null 2>/dev/null
 if [[ $? -ne 0 ]]; then
     echo "rustfmt found problems; run cargo fmt before committing"
