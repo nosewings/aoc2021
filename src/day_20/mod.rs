@@ -1,4 +1,3 @@
-use combine::error::Commit;
 use combine::Parser;
 use itertools::Itertools;
 use ndarray::Array2;
@@ -140,10 +139,6 @@ pub fn parse_input<'a>() -> impl Parser<&'a str, Output = Input> {
     key()
         .skip(newline())
         .and(image())
-        .skip(parser(|input| {
-            Ok((println!("{:?}", input), Commit::Commit(())))
-        }))
-        //.skip(newline())
         .skip(eof())
         .map(|(key, image)| Input { key, image })
 }
