@@ -1,6 +1,6 @@
 use combine::error::StringStreamError;
 use combine::Parser;
-use itertools::Itertools;
+use rayon::iter::{IntoParallelRefIterator, ParallelIterator};
 
 use self::cuboid::Cuboid;
 use crate::day_22::vector::Vector;
@@ -31,13 +31,13 @@ impl Input {
         for s in self.steps {
             decomposed_steps.extend(
                 decomposed_steps
-                    .iter()
+                    .par_iter()
                     .flat_map(|d| {
                         let region = s.region.intersect(d.region)?;
                         let value = !d.value;
                         Some(Step { region, value })
                     })
-                    .collect_vec(),
+                    .collect::<Vec<_>>(),
             );
             if s.value {
                 decomposed_steps.push(s);
