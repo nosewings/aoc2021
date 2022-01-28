@@ -27,6 +27,7 @@ pub mod day_18;
 pub mod day_19;
 pub mod day_20;
 pub mod day_21;
+pub mod day_22;
 
 use std::fmt::Display;
 use std::io::Read;
@@ -35,7 +36,7 @@ use std::ops::RangeInclusive;
 use std::str::FromStr;
 
 use combine::parser::char::char;
-use combine::Parser;
+use combine::{Parser, Stream};
 use frunk::monoid::Monoid;
 use frunk::Semigroup;
 use itertools::Itertools;
@@ -359,6 +360,15 @@ where
                                                                           None => T::one(),
                                                                           _ => T::one().neg()
                                                                       } * n)
+}
+
+// Requiring Clone here is probably a hack: I haven't figured out how
+// to make the lifetimes fit together without it.
+pub fn combine_get_input<Input>() -> impl Parser<Input, Output = Input>
+where
+    Input: Stream + Clone,
+{
+    combine::parser(|input: &mut Input| Ok((input.clone(), combine::error::Commit::Peek(()))))
 }
 
 /// Ripped off from the take_mut crate.  See `take_return` for an
