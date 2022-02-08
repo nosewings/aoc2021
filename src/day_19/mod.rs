@@ -3,6 +3,7 @@ use std::fmt::Debug;
 use std::sync::Mutex;
 
 use combine::Parser;
+use counter::Counter;
 use itertools::Itertools;
 use nalgebra::{IsometryMatrix3, Matrix3, Point3, Rotation3, Translation3};
 use petgraph::graph::NodeIndex;
@@ -57,16 +58,28 @@ pub fn parse_input<'a>() -> impl Parser<&'a str, Output = Vec<Vec<Point3<i32>>>>
 #[derive(PartialEq, Eq, Clone, Default, Debug)]
 struct ScannerFrame {
     beacons: HashSet<Point3<i32>>,
+    fingerprint: Counter<i32>,
 }
 
 impl ScannerFrame {
     fn from_distances(distances: Vec<Point3<i32>>) -> Self {
         Self {
-            beacons: HashSet::from_iter(distances.into_iter()),
+            beacons: HashSet::from_iter(distances.iter().copied()),
+            fingerprint: Counter::from_iter(
+                distances
+                    .iter()
+                    .copied()
+                    .cartesian_product(distances.iter().copied())
+                    .map(|(u, v)| (u - v).cast::<f32>().norm_squared() as i32),
+            ),
         }
     }
 
     fn make_consistent(&self, other: &ScannerFrame, needed: usize) -> Option<IsometryMatrix3<f32>> {
+        if (self.fingerprint.clone() & other.fingerprint.clone()).len() <= needed * (needed - 1) / 2
+        {
+            return None;
+        }
         for (b1, b2) in self.beacons.iter().cartesian_product(other.beacons.iter()) {
             for r in *ROTATIONS {
                 let t = Translation3::from(b2.cast() - r * b1.cast());
@@ -90,31 +103,28 @@ mod test_make_consistent {
     use super::*;
 
     lazy_static::lazy_static! {
-        static ref FRAME1: ScannerFrame = ScannerFrame {
-            beacons: vec![
+        static ref FRAME1: ScannerFrame = ScannerFrame::from_distances(
+            vec![
                 Point3::new(0, 1, 0),
                 Point3::new(1, 2, 0),
                 Point3::new(3, 5, 0),
-            ].into_iter().collect(),
-        };
+            ]);
 
         // Just rotate by 90 degrees about the origin.
-        static ref FRAME2: ScannerFrame = ScannerFrame {
-            beacons: vec![
+        static ref FRAME2: ScannerFrame = ScannerFrame::from_distances(
+            vec![
                 Point3::new(-1, 0, 0),
                 Point3::new(-2, 1, 0),
                 Point3::new(-5, 3, 0)
-            ].into_iter().collect()
-        };
+            ]);
 
         // Rotate by 180 degrees and translate.
-        static ref FRAME3: ScannerFrame = ScannerFrame {
-            beacons: vec![
+        static ref FRAME3: ScannerFrame = ScannerFrame::from_distances(
+            vec![
                 Point3::new(1, 1, 0),
                 Point3::new(0, 0, 0),
                 Point3::new(-2, -3, 0),
-            ].into_iter().collect(),
-        };
+            ]);
     }
 
     #[test]
