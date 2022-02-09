@@ -30,6 +30,7 @@ impl Input {
     }
 
     fn max_vx(self) -> i32 {
+        assert!(self.x_hi >= 0);
         self.x_hi
     }
 
@@ -39,7 +40,7 @@ impl Input {
     }
 
     fn max_vy(self) -> i32 {
-        assert!(self.y_hi <= 0);
+        assert!(self.y_lo <= 0);
         // The maximum feasible vy₀ makes us just barely hit the
         // bottom of the target y-region on the way down (rather than
         // simply falling past it).  Note that y-coordinates are
