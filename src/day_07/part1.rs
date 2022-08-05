@@ -1,5 +1,3 @@
-#![feature(int_abs_diff)]
-
 use aoc2021::day_07::*;
 use aoc2021::*;
 

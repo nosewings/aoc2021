@@ -1,5 +1,3 @@
-#![feature(vec_retain_mut)]
-
 use aoc2021::day_04::*;
 use aoc2021::*;
 
