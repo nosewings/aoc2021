@@ -156,14 +156,10 @@ where
     ret
 }
 
-/// A trait for monkey-patching Haskell's `foldMap` onto Rust's
-/// iterators.
 pub trait FoldMapOption {
     /// The item type for this type.
     type Item;
 
-    /// Map the items to a `Monoid`, and them combine the results
-    /// monoidally.
     fn fold_map_option<S, F>(self, f: F) -> Option<S>
     where
         S: Semigroup,
