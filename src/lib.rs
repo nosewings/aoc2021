@@ -29,6 +29,7 @@ pub mod day_19;
 pub mod day_20;
 pub mod day_21;
 pub mod day_22;
+pub mod day_23;
 
 use std::fmt::Display;
 use std::io::Read;
@@ -46,7 +47,7 @@ use nom::character::complete::{digit1, newline};
 use nom::combinator::{all_consuming, map_res};
 use nom::sequence::terminated;
 use nom::IResult;
-use num_traits::Signed;
+use num_traits::{Signed, Num};
 
 pub fn read_input(n: u32) -> String {
     let args = std::env::args().collect::<Vec<_>>();
@@ -94,6 +95,25 @@ macro_rules! make_main_combine {
 }
 
 #[macro_export]
+macro_rules! make_main_combine_easy {
+    ($day:literal, $parse:expr, $run:ident) => {
+        fn main() {
+            use ::aoc2021::read_input;
+            use ::combine::EasyParser;
+            use ::std::ops::Deref;
+
+            let s = read_input($day);
+            let s = s.deref();
+            let (v, _) = $parse()
+                .easy_parse(s)
+                .map_err(|err| err.map_position(|p| p.translate_position(s)))
+                .expect("error while parsing input");
+            println!("{}", $run(v));
+        }
+    };
+}
+
+#[macro_export]
 macro_rules! make_test {
     ($day: literal, $part:literal, $parse:ident, $run:ident, $expected:literal) => {
         #[cfg(test)]
@@ -131,6 +151,35 @@ macro_rules! make_test_combine {
                 fn [<test_ $day _ $part>]() {
                     let s = read_input($day);
                     let (p, _) = $parse().parse(&s).expect("error while parsing input");
+                    let v = $run(p);
+                    assert_eq!(v, $expected);
+                }
+            }
+        }
+    };
+}
+
+#[macro_export]
+macro_rules! make_test_combine_easy {
+    ($day:literal, $part:literal, $parse:expr, $run:expr, $expected:expr) => {
+        #[cfg(test)]
+        mod test {
+            use ::aoc2021::read_input;
+            use ::std::ops::Deref;
+            use ::combine::EasyParser;
+            use ::paste::paste;
+
+            use super::*;
+
+            paste! {
+                #[test]
+                fn [<test_ $day _ $part>]() {
+                    let s = read_input($day);
+                    let s = s.deref();
+                    let (p, _) = $parse()
+                        .easy_parse(s)
+                        .map_err(|err| err.map_position(|p| p.translate_position(s)))
+                        .expect("error while parsing input");
                     let v = $run(p);
                     assert_eq!(v, $expected);
                 }
@@ -398,4 +447,8 @@ where
         std::ptr::write(mut_ref, new_t);
         r
     }
+}
+
+pub fn triangular<N: Num + Copy>(n: N) -> N {
+    (n * (n + N::one())) / (N::one() + N::one())
 }

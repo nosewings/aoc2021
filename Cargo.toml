@@ -4,6 +4,8 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+arrayvec = "0.7.2"
+binary-heap-plus = "0.4.1"
 bit-matrix = "0.6.1"
 combine = "4.6.2"
 counter = "0.5.2"
@@ -200,3 +202,11 @@ path = "src/day_22/part1.rs"
 [[bin]]
 name = "22_2"
 path = "src/day_22/part2.rs"
+
+[[bin]]
+name = "23_1"
+path = "src/day_23/part1.rs"
+
+[[bin]]
+name = "23_2"
+path = "src/day_23/part2.rs"
